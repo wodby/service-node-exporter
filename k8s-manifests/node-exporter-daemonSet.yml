@@ -1,0 +1,62 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: node-exporter
+  labels:
+    name: node-exporter
+  namespace: monitoring
+spec:
+  selector:
+    matchLabels:
+      name: node-exporter
+  template:
+    metadata:
+      labels:
+        name: node-exporter
+    spec:
+      containers:
+        - name: node-exporter
+          image: wodby/monitoring-agent:0.1.0-rc.1
+          imagePullPolicy: IfNotPresent
+          args:
+            - node-exporter
+          env:
+            - name: HOSTNAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: spec.nodeName
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "100Mi"
+            limits:
+              cpu: "500m"
+              memory: "500Mi"
+          securityContext:
+            privileged: true
+            runAsUser: 0
+            capabilities:
+              add: [ "SYS_TIME" ]
+          ports:
+            - containerPort: 80
+              name: http-metrics
+          volumeMounts:
+            - name: rootfs
+              mountPath: /host/root
+              readOnly: true
+            - name: sysfs
+              mountPath: /host/sys
+              readOnly: true
+            - name: procfs
+              mountPath: /host/proc
+              readOnly: true
+      volumes:
+        - name: rootfs
+          hostPath:
+            path: /
+        - name: sysfs
+          hostPath:
+            path: /sys
+        - name: procfs
+          hostPath:
+            path: /proc
