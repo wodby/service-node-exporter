@@ -1,0 +1,5 @@
+name: monitoring-node-exporter
+title: Monitoring agent node_exporter
+type: infrastructure
+hostname: node-exporter
+scalable: false
