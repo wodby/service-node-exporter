@@ -2,13 +2,15 @@ apiVersion: apps/v1
 kind: DaemonSet
 metadata:
   name: node-exporter
+  namespace: monitoring
   labels:
     name: node-exporter
-  namespace: monitoring
 spec:
   selector:
     matchLabels:
       name: node-exporter
+  minReadySeconds: 10
+  updateStrategy: RollingUpdate
   template:
     metadata:
       labels:
@@ -25,13 +27,6 @@ spec:
               valueFrom:
                 fieldRef:
                   fieldPath: spec.nodeName
-          resources:
-            requests:
-              cpu: "100m"
-              memory: "100Mi"
-            limits:
-              cpu: "500m"
-              memory: "500Mi"
           securityContext:
             privileged: true
             runAsUser: 0
@@ -40,6 +35,13 @@ spec:
           ports:
             - containerPort: 80
               name: http-metrics
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "100Mi"
+            limits:
+              cpu: "500m"
+              memory: "500Mi"
           volumeMounts:
             - name: rootfs
               mountPath: /host/root
