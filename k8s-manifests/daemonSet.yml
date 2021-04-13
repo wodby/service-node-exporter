@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - name: node-exporter
-          image: wodby/monitoring-agent:0.1.0-rc.4
+          image: wodby/monitoring-agent:0.1.0-rc.5
           args:
             - node-exporter
           env:
