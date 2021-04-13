@@ -32,13 +32,6 @@ spec:
             runAsUser: 0
             capabilities:
               add: [ "SYS_TIME" ]
-          resources:
-            requests:
-              cpu: "50m"
-              memory: "100Mi"
-            limits:
-              cpu: "200m"
-              memory: "300Mi"
           readinessProbe:
             httpGet:
               path: /-/ready
