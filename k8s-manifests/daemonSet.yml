@@ -9,7 +9,6 @@ spec:
   selector:
     matchLabels:
       name: node-exporter
-  minReadySeconds: 10
   template:
     metadata:
       labels:
@@ -25,14 +24,14 @@ spec:
               valueFrom:
                 fieldRef:
                   fieldPath: spec.nodeName
+          ports:
+            - containerPort: 80
+              name: http-metrics
           securityContext:
             privileged: true
             runAsUser: 0
             capabilities:
               add: [ "SYS_TIME" ]
-          ports:
-            - containerPort: 80
-              name: http-metrics
           resources:
             requests:
               cpu: "50m"
@@ -40,6 +39,18 @@ spec:
             limits:
               cpu: "200m"
               memory: "300Mi"
+          readinessProbe:
+            httpGet:
+              path: /-/ready
+              port: 80
+            initialDelaySeconds: 5
+            timeoutSeconds: 5
+          livenessProbe:
+            httpGet:
+              path: /-/healthy
+              port: 80
+            initialDelaySeconds: 5
+            timeoutSeconds: 5
           volumeMounts:
             - name: rootfs
               mountPath: /host/root
