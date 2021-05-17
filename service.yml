@@ -5,7 +5,3 @@ hostname: node-exporter
 scalable: false
 containers:
   - name: node-exporter
-    resources:
-      limit:
-        cpu: 500
-        memory: 500
