@@ -6,9 +6,6 @@ scalable: false
 containers:
   - name: node-exporter
     resources:
-      request:
-        cpu: 50
-        memory: 80
       limit:
         cpu: 500
         memory: 500
