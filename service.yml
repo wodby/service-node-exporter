@@ -2,6 +2,3 @@ name: monitoring-node-exporter
 title: Monitoring node-exporter
 type: infrastructure
 hostname: node-exporter
-scalable: false
-containers:
-  - name: node-exporter
