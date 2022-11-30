@@ -1,4 +1,4 @@
-name: monitoring-node-exporter
+name: node-exporter
 title: Monitoring node-exporter
 type: infrastructure
 hostname: node-exporter
