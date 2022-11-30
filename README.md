@@ -1,1 +1,1 @@
-# service-monitoring-node-exporter
+# Node exporter monitoring service
