@@ -16,4 +16,4 @@ helm:
     labels: labels
     annotations: podAnnotations
     resources: resources
-    envVars: envVars
+    env: envVars
