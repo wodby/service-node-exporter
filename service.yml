@@ -16,4 +16,3 @@ helm:
     labels: podLabels
     annotations: daemonsetAnnotations
     resources: resources
-    env: env
