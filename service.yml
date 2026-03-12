@@ -12,7 +12,7 @@ helm:
   chart: prometheus-community/prometheus-node-exporter
   version: 4.32.0
   configurations:
-  - name: node-exporter
+  - container: node-exporter
     labels: podLabels
     annotations: daemonsetAnnotations
     resources: resources
