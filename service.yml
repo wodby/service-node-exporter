@@ -1,6 +1,7 @@
 name: node-exporter
 title: Monitoring node-exporter
 type: infrastructure
+icon: prometheus
 scalable: false
 containers:
   - name: node-exporter
