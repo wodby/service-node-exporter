@@ -16,6 +16,6 @@ helm:
     labels: podLabels
     annotations: daemonsetAnnotations
     resources: resources
-    env: env
+    envKV: env
     volumes: extraVolumes
     mounts: extraVolumeMounts 
