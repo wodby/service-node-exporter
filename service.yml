@@ -3,19 +3,23 @@ title: Node exporter
 type: infrastructure
 icon: prometheus
 scalable: false
-containers:
-  - name: node-exporter
-
 helm:
   name: prometheus-community
   source: https://prometheus-community.github.io/helm-charts
   chart: prometheus-community/prometheus-node-exporter
   version: 4.52.2
-  configurations:
-  - container: node-exporter
+workloads:
+- id: main
+  kind: daemonset
+  primary: true
+  containers:
+  - name: node-exporter
+
+    helm:
+      resources: resources
+      envKV: env
+      mounts: extraVolumeMounts
+  helm:
     labels: podLabels
     annotations: daemonsetAnnotations
-    resources: resources
-    envKV: env
     volumes: extraVolumes
-    mounts: extraVolumeMounts 
