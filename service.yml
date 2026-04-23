@@ -8,18 +8,18 @@ helm:
   source: https://prometheus-community.github.io/helm-charts
   chart: prometheus-community/prometheus-node-exporter
   version: 4.52.2
+
 workloads:
 - id: main
   kind: daemonset
   primary: true
-  containers:
-  - name: node-exporter
-
-    helm:
-      resources: resources
-      envKV: env
-      mounts: extraVolumeMounts
   helm:
     labels: podLabels
     annotations: daemonsetAnnotations
     volumes: extraVolumes
+  containers:
+  - name: node-exporter
+    helm:
+      resources: resources
+      envKV: env
+      mounts: extraVolumeMounts
