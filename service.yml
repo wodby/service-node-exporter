@@ -13,7 +13,7 @@ workloads:
 - name: main
   selector:
     matchLabels:
-      app.kubernetes.io/instance: '{{service.helm.release}}'
+      app.kubernetes.io/instance: '{{helm.release}}'
   kind: daemonset
   primary: true
   helm:
