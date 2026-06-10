@@ -8,6 +8,15 @@ helm:
   source: https://prometheus-community.github.io/helm-charts
   chart: prometheus-community/prometheus-node-exporter
   version: 4.52.2
+  values:
+  - name: hostNetwork
+    value: false
+  - name: hostPID
+    value: true
+  - name: hostRootFsMount.enabled
+    value: true
+  - name: service.listenOnAllInterfaces
+    value: true
 
 workloads:
 - name: main
