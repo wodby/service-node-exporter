@@ -31,6 +31,8 @@ workloads:
     volumes: extraVolumes
   containers:
   - name: node-exporter
+    resources:
+      preset: nano
     helm:
       resources: resources
       envKV: env
