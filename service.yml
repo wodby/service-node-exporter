@@ -17,6 +17,85 @@ helm:
     value: true
   - name: service.listenOnAllInterfaces
     value: true
+  # The chart defaults plus the textfile collector, which serves the K3S
+  # local-path volume usage written by the sidecar below.
+  - name: extraArgs
+    value:
+    - --collector.filesystem.mount-points-exclude=^/(dev|proc|sys|run/containerd/.+|var/lib/docker/.+|var/lib/kubelet/.+)($|/)
+    - --collector.filesystem.fs-types-exclude=^(autofs|binfmt_misc|bpf|cgroup2?|configfs|debugfs|devpts|devtmpfs|fusectl|hugetlbfs|iso9660|mqueue|nsfs|overlay|proc|procfs|pstore|rpc_pipefs|securityfs|selinuxfs|squashfs|sysfs|tracefs|erofs)$
+    - --collector.textfile.directory=/run/wodby-textfile
+  # Shared in-memory folder: the sidecar writes, node-exporter reads.
+  - name: sidecarVolumeMount
+    value:
+    - name: wodby-textfile
+      mountPath: /run/wodby-textfile
+      readOnly: false
+  # Measures K3S local-path volumes every 10 minutes. It uses the node-exporter
+  # image (busybox) and the pod's read-only host root mount. It runs as root
+  # with every capability dropped except DAC_READ_SEARCH, so it can read
+  # volume folders owned by other users, such as database data folders.
+  - name: sidecars
+    value:
+    - name: local-path-volume-usage
+      command:
+      - /bin/sh
+      - -c
+      - |
+        # Measures each K3S local-path volume directory and writes the totals for
+        # node-exporter's textfile collector. Kubelet reports no statistics for these
+        # host-folder volumes. Folders are named pvc-<uid>_<namespace>_<claim>; neither
+        # name can contain "_". A volume whose scan fails or times out is left out, and
+        # a host without the storage folder (any non-K3S node) gets no file.
+        storage=/host/root/var/lib/rancher/k3s/storage
+        out=/run/wodby-textfile/wodby_local_path_volumes.prom
+        while true; do
+          if [ -d "$storage" ]; then
+            {
+              echo '# HELP wodby_local_path_volume_used_bytes Disk space used by a K3S local-path volume folder.'
+              echo '# TYPE wodby_local_path_volume_used_bytes gauge'
+              for dir in "$storage"/pvc-*_*_*; do
+                [ -d "$dir" ] || continue
+                claim="${dir##*/}"
+                claim="${claim#*_}"
+                namespace="${claim%%_*}"
+                claim="${claim#*_}"
+                used=$(timeout 300 nice -n 19 du -skx "$dir" 2>/dev/null | cut -f1)
+                case "$used" in
+                  ''|*[!0-9]*) continue ;;
+                esac
+                echo "wodby_local_path_volume_used_bytes{pvc_namespace=\"$namespace\",persistentvolumeclaim=\"$claim\"} $((used * 1024))"
+              done
+              echo '# HELP wodby_local_path_volume_scan_timestamp_seconds When the last scan of K3S local-path volumes finished.'
+              echo '# TYPE wodby_local_path_volume_scan_timestamp_seconds gauge'
+              echo "wodby_local_path_volume_scan_timestamp_seconds $(date +%s)"
+            } > "$out.tmp" && mv "$out.tmp" "$out"
+          else
+            rm -f "$out" "$out.tmp"
+          fi
+          sleep 600
+        done
+      volumeMounts:
+      - name: root
+        mountPath: /host/root
+        readOnly: true
+        mountPropagation: HostToContainer
+      securityContext:
+        runAsUser: 0
+        runAsGroup: 0
+        runAsNonRoot: false
+        allowPrivilegeEscalation: false
+        readOnlyRootFilesystem: true
+        capabilities:
+          drop:
+          - ALL
+          add:
+          - DAC_READ_SEARCH
+      resources:
+        requests:
+          cpu: 10m
+          memory: 16Mi
+        limits:
+          memory: 128Mi
 
 workloads:
 - name: main
